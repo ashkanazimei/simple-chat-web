@@ -125,6 +125,11 @@
             border-color: #4CAF50;
         }
         
+        .input-container input:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
         .input-container button {
             padding: 12px 20px;
             background: #4CAF50;
@@ -161,6 +166,7 @@
             background: #ffeb3b;
             color: #333;
             font-size: 14px;
+            display: none;
         }
         
         @media (max-width: 480px) {
@@ -172,6 +178,25 @@
             .message {
                 max-width: 90%;
             }
+        }
+
+        /* استایل برای اسکرول بار */
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
     </style>
 </head>
@@ -193,11 +218,13 @@
                 <div class="status" id="status">🔄 در حال اتصال...</div>
             </div>
             
-            <div id="connectionStatus" class="connection-status" style="display: none;">
+            <div id="connectionStatus" class="connection-status">
                 🔄 در حال اتصال مجدد...
             </div>
             
-            <div class="messages" id="messages"></div>
+            <div class="messages" id="messages">
+                <!-- پیام ها اینجا نمایش داده می شوند -->
+            </div>
             
             <div class="input-container">
                 <input type="text" id="messageInput" placeholder="پیام خود را بنویسید..." 
@@ -244,7 +271,7 @@
             socket.on('userConnected', (data) => {
                 currentUserNumber = data.userNumber;
                 statusDiv.innerHTML = `🟢 شما کاربر ${data.userNumber} هستید`;
-                usersCountDiv.textContent = `${data.userNumber}/${data.maxUsers}`;
+                usersCountDiv.textContent = `${data.userNumber}/2`;
                 addSystemMessage('شما به چت متصل شدید');
                 
                 if (data.userNumber === 1) {
@@ -264,7 +291,7 @@
                 messageInput.focus();
             });
             
-            // دریافت پیام جدید
+            // دریافت پیام جدید - اصلاح شده
             socket.on('newMessage', (data) => {
                 const isMyMessage = data.userNumber === currentUserNumber;
                 addMessage(data.text, isMyMessage, data.timestamp);
@@ -311,11 +338,12 @@
             });
         }
         
-        // ارسال پیام
+        // ارسال پیام - اصلاح شده
         function sendMessage() {
             const message = messageInput.value.trim();
             if (message && isConnected) {
-                socket.emit('sendMessage', { text: message });
+                // ارسال مستقیم متن پیام
+                socket.emit('sendMessage', message);
                 messageInput.value = '';
             }
         }
